@@ -13,6 +13,21 @@ require 'spec_helper'
 
 describe User do
   
+  it { should respond_to(:admin) }
+  it { should respond_to(:authenticate) }
+
+  it { should be_valid }
+  it { should_not be_admin }
+
+  describe "with admin attributes set to 'true'" do
+    before do
+      @user.save!
+      @user.toggle!(:admin)
+    end
+
+    it { should be_admin }
+  end
+
   before do
     @user = User.new(:name=> "Example User", :email=> "user@example.com",     
                      :password => "foobar", :password_confirmation => "foobar")
