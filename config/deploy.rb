@@ -1,43 +1,28 @@
-# Automatic "bundle install" after deploy
- require 'bundler/capistrano'
-#  
-#  # Application name
-  set :application, "sample_app"
-#   
-#   # BlueHost SSH user
+set :application, "sample_app"
 set :user, "haynesde"
-#    
-#    # App Domain
-set :domain, "haynesdesignco.com"
-#     
-#     # We don't need sudo on BlueHost
+set :domain, "#{user}@haynesdesignco.com"
+ 
+set :repository,  "#{domain}:/home/#{user}/rails/#{application}"
+set :local_repository, "."
+ 
+default_run_options[:pty] = true
+set :scm_command, "/home/#{user}/bin/git"
 set :use_sudo, false
-#      
-#      # git is our SCM
+ 
+# If you have previously been relying upon the code to start, stop
+# and restart your mongrel application, or if you rely on the database
+# migration code, please uncomment the lines you require below
+#  
+# If you aren't deploying to /u/apps/#{application} on the target
+# servers (which is the default), you can specify the actual location
+# via the :deploy_to variable:
+set :deploy_to, "/home/#{user}/rails/#{application}"
+#   
+#   # If you aren't using Subversion to manage your source code, specify
+#   # your SCM below:
 set :scm, :git
-#       
-#       # master is our default git branch
-set :branch, "master"
-#        
-#        # Use local git repository
-set :repository, "."
-#         
-#         # Checkout, compress and send a local copy
-set :deploy_via, :copy
-set :deploy_to, "/home1/#{user}/rails_apps/#{application}"
-#          
-#          # We have all components of the app on the same server
-server domain, :app, :web, :db, :primary => true
-#           
-namespace :deploy do
-task :start do ; end
-task :stop do ; end
-
-#                  # Touch tmp/restart.txt to tell Phusion Passenger about new version
-task :restart, :roles => :app, :e%>ept => { :no_release => true } do
-  run "touch #{File.join(current_path, 'tmp', 'restart.txt')}"
-  end
-end
-#                           
-#                           # Clean-up old releases
-after "deploy:restart", "deploy:cleanup"
+#   # see a full list by running "gem contents capistrano | grep 'scm/'"
+#    
+role :web, domain
+role :app, domain
+role :db, domain, :primary => true
